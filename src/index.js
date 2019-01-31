@@ -1,15 +1,3 @@
-import {
-  cloneObjOrArr,
-  generateObjOrArr,
-  isArrayAccessor,
-  isArrayOrStr,
-  isNull,
-  isStr,
-  isUndefined,
-  isValidArrayIndex,
-  stripBrackets,
-} from './helpers'
-
 const PKG_NAME = 'props-ops'
 
 /**
@@ -21,7 +9,7 @@ const PKG_NAME = 'props-ops'
  */
 export function get(obj, propString, def = null) {
   if (!isStr(propString)) {
-    throw new Error(PKG_NAME + ' get: invalid `propString` parameter')
+    throwErr('get', 'propString')
   }
 
   const path = propString.split('.')
@@ -50,10 +38,12 @@ export function get(obj, propString, def = null) {
  * @return {Object}            updated object
  */
 export function set(obj, propString, value) {
-  if (!isArrayOrStr(propString) || isUndefined(value)) {
-    throw new Error(
-      PKG_NAME + ' set: invalid `propString` or `value` parameter'
-    )
+  if (!isArrayOrStr(propString)) {
+    throwErr('set', 'propString')
+  }
+
+  if (isUndefined(value)) {
+    throwErr('set', 'value')
   }
 
   const path = Array.isArray(propString) ? propString : propString.split('.')
@@ -85,10 +75,12 @@ export function set(obj, propString, value) {
  * @return {Object}            updated object
  */
 export function setImmutable(obj, propString, value) {
-  if (!isArrayOrStr(propString) || isUndefined(value)) {
-    throw new Error(
-      PKG_NAME + ' set: invalid `propString` or `value` parameter'
-    )
+  if (!isArrayOrStr(propString)) {
+    throwErr('setImmutable', 'propString')
+  }
+
+  if (isUndefined(value)) {
+    throwErr('setImmutable', 'value')
   }
 
   const path = Array.isArray(propString) ? propString : propString.split('.')
@@ -113,8 +105,6 @@ export function setImmutable(obj, propString, value) {
   return clone
 }
 
-set.immutable = setImmutable
-
 /**
  * Safely check if passed object has deeply nested property
  * @param  {Object} obj        object to traverse
@@ -123,7 +113,7 @@ set.immutable = setImmutable
  */
 export function has(obj, propString) {
   if (!isStr(propString)) {
-    throw new Error(PKG_NAME + ' get: invalid `propString` parameter')
+    throwErr('has', 'propString')
   }
 
   const path = propString.split('.')
@@ -153,7 +143,7 @@ export function has(obj, propString) {
  */
 export function del(obj, propString) {
   if (!isArrayOrStr(propString)) {
-    throw new Error(PKG_NAME + ' del: invalid `propString` parameter')
+    throwErr('del', 'propString')
   }
 
   const path = Array.isArray(propString) ? propString : propString.split('.')
@@ -186,7 +176,7 @@ export function del(obj, propString) {
  */
 export function delImmutable(obj, propString) {
   if (!isArrayOrStr(propString)) {
-    throw new Error(PKG_NAME + ' del: invalid `propString` parameter')
+    throwErr('delImmutable', 'propString')
   }
 
   const path = Array.isArray(propString) ? propString : propString.split('.')
@@ -212,4 +202,56 @@ export function delImmutable(obj, propString) {
   return clone
 }
 
+/**
+ * Stylistic alternatives
+ */
+set.immutable = setImmutable
 del.immutable = delImmutable
+
+/**
+ * Helpers
+ */
+
+function throwErr(fnName, paramName) {
+  throw new Error(`${PKG_NAME} - ${fnName}: invalid parameter: ${paramName}`)
+}
+
+function isStr(val) {
+  return typeof val === 'string'
+}
+
+function isArrayOrStr(val) {
+  return isStr(val) || Array.isArray(val)
+}
+
+function isUndefined(val) {
+  return val === undefined
+}
+
+function isNull(val) {
+  return val === null
+}
+
+function isValidArrayIndex(val) {
+  return !Number.isNaN(parseInt(val, 10))
+}
+
+function isArrayAccessor(val) {
+  return isStr(val) && val[0] === '['
+}
+
+function stripBrackets(val) {
+  return isArrayAccessor(val) ? val.slice(1, val.length - 1) : val
+}
+
+function generateObjOrArr(shouldBeArray) {
+  return shouldBeArray ? [] : {}
+}
+
+function cloneObjOrArr(obj, shouldBeArray) {
+  if (isUndefined(obj)) {
+    return generateObjOrArr(shouldBeArray)
+  }
+
+  return shouldBeArray ? obj.slice() : Object.assign({}, obj)
+}
