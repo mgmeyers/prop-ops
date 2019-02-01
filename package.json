@@ -7,7 +7,7 @@
   "bugs": {
     "url": "https://github.com/mgmeyers/prop-ops/issues"
   },
-  "author": "Matthew Meyers, Sunyoung Kim",
+  "contributors": ["Matthew Meyers", "Sunyoung Kim"],
   "homepage": "https://github.com/mgmeyers/prop-ops",
   "license": "MIT",
   "scripts": {
