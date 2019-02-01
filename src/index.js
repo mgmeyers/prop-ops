@@ -1,4 +1,6 @@
 /**
+ * `npm install prop-ops`
+ *
  * `prop-ops` assists in performing CRUD operations on javascript objects and arrays
  * in an uncertain world. `prop-ops` operates in an immutable way by default, with the
  * option of transforming objects in place
