@@ -80,6 +80,13 @@ test('should set props', t => {
       message: 'should override deeply nested prop inside array',
     },
     {
+      obj: { a: [{ b: { c: 'd' } }] },
+      propStr: 'a.[1]',
+      value: 12,
+      expected: { a: [{ b: { c: 'd' } }, 12] },
+      message: 'should set array member',
+    },
+    {
       obj: {},
       propStr: 'a.[0].b.c',
       value: 12,
@@ -224,6 +231,12 @@ test('should delete props', t => {
       message: 'should delete shallow prop',
     },
     {
+      obj: { a: 'b' },
+      propStr: 'b',
+      expected: { a: 'b' },
+      message: 'should do nothing for non-existent props',
+    },
+    {
       obj: { a: { b: { c: 'd' } } },
       propStr: 'a.b.c',
       expected: {
@@ -280,6 +293,12 @@ test('should immutably delete props', t => {
       propStr: 'a',
       expected: {},
       message: 'should delete shallow prop',
+    },
+    {
+      obj: { a: 'b' },
+      propStr: 'b',
+      expected: { a: 'b' },
+      message: 'should do nothing for non-existent props',
     },
     {
       obj: { a: { b: { c: 'd' } } },

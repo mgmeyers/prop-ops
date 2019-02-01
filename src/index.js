@@ -18,7 +18,7 @@ const PKG_NAME = 'prop-ops'
  * @example
  * import * as prop from 'prop-ops'
  *
- * const objA = { a: { b: "c" } }
+ * const objA = { a: { b: 'c' } }
  * prop.get(objA, 'a.b')
  * // > 'c'
  *
@@ -29,7 +29,7 @@ const PKG_NAME = 'prop-ops'
  * // > 24
  *
  * // Traverse an array
- * const objB = { a: [{ b: "c" }] }
+ * const objB = { a: [{ b: 'c' }] }
  * prop.get(objB, 'a.[0].b')
  * // > 'c'
  */
@@ -58,13 +58,23 @@ export function get(obj, propString, fallBack = null) {
 }
 
 /**
- * Safely set deeply nested object properties.
+ * Sets deeply nested object properties. `set` will generate objects (or arrays)
+ * to reach the final destination of the input path
  *
- * @param  {Object} obj        object to traverse
- * @param  {String} propString ie. 'report.properties.is_big_box'
+ * @param  {Object|Array} obj        the object or array to traverse
+ * @param  {String}       propString the path to the desired property
+ * @param  {Any}          value      the value to set
  *
  * @example
  * import * as prop from 'prop-ops'
+ *
+ * const objA = { a: { b: 'c' } }
+ * prop.set(objA, 'a.c', 'd')
+ * // > objA == { a: { b: 'c', c: 'd' } }
+ *
+ * const emptyObj = {}
+ * prop.set(emptyObj, 'a.[0].b.c', 12)
+ * // > emptyObj == { a: [{ b: { c: 12 } }] }
  *
  */
 export function set(obj, propString, value) {
@@ -103,10 +113,22 @@ export function set(obj, propString, value) {
 }
 
 /**
- * Safely sets deeply nested object properties and returns a new object
- * @param  {Object} obj        object to traverse
- * @param  {String} propString ie. 'report.properties.is_big_box'
- * @return {Object}            updated object
+ * Like `set`, but will not modify the original object
+ *
+ * @param  {Object|Array} obj        the object or array to traverse
+ * @param  {String}       propString the path to the desired property
+ * @param  {Any}          value      the value to set
+ * @return {Object|Array}            an updated version of the `obj`
+ *
+ * @example
+ * import * as prop from 'prop-ops'
+ *
+ * const objA = { a: { b: 'c' } }
+ * const updatedA = prop.setImmutable(objA, 'a.c', 'd')
+ * // Also: prop.set.immutable(objA, 'a.c', 'd')
+ * // > objA     == { a: { b: 'c' } }
+ * // > updatedA == { a: { b: 'c', c: 'd' } }
+ *
  */
 export function setImmutable(obj, propString, value) {
   if (!isUndefined(obj) && typeof obj !== 'object') {
@@ -144,10 +166,21 @@ export function setImmutable(obj, propString, value) {
 }
 
 /**
- * Safely check if passed object has deeply nested property
+ * Check if an object or array has a property
+ *
  * @param  {Object} obj        object to traverse
- * @param  {String} propString ie. 'report.properties.is_big_box'
- * @return {Boolean}           if obj has value under passed propString or not
+ * @param  {String} propString the path to the desired property
+ * @return {Boolean}
+ *
+ * @example
+ * import * as prop from 'prop-ops'
+ *
+ * const objA = { a: [{ b: { c: 'd' } }] }
+ * prop.has(objA, 'a.b')
+ * // > false
+ * prop.has(objA, 'a.[0].b.c')
+ * // > true
+ *
  */
 export function has(obj, propString) {
   if (!isStr(propString)) {
@@ -174,10 +207,20 @@ export function has(obj, propString) {
 }
 
 /**
- * Safely delete deeply nested object properties
+ * Deletes deeply nested object properties
+ *
  * @param  {Object} obj        object to traverse
- * @param  {String} propString ie. 'report.properties.is_big_box'
- * @return {Object}            updated object
+ * @param  {String} propString the path to the desired property
+ *
+ * @example
+ * import * as prop from 'prop-ops'
+ *
+ * const objA = { a: [{ b: { c: 'd' } }] }
+ * prop.del(objA, 'a.b')
+ * // noop
+ * prop.del(objA, 'a.[0].b')
+ * // objA == { a: [{}] }
+ *
  */
 export function del(obj, propString) {
   if (!isUndefined(obj) && typeof obj !== 'object') {
@@ -211,10 +254,21 @@ export function del(obj, propString) {
 }
 
 /**
- * Safely delete deeply nested object properties
+ * Like `del` but will not modify the original object
+ *
  * @param  {Object} obj        object to traverse
- * @param  {String} propString ie. 'report.properties.is_big_box'
+ * @param  {String} propString the path to the desired property
  * @return {Object}            updated object
+ *
+ * @example
+ * import * as prop from 'prop-ops'
+ *
+ * const objA = { a: { b: { c: 'd' } } }
+ * const updatedA = prop.del(objA, 'a.b')
+ * // Also: prop.del.immutable(objA, 'a.b')
+ * // > objA == { a: { b: { c: 'd' } } }
+ * // > updatedA == { a: {} }
+ *
  */
 export function delImmutable(obj, propString) {
   if (!isUndefined(obj) && typeof obj !== 'object') {
@@ -248,8 +302,14 @@ export function delImmutable(obj, propString) {
   return clone
 }
 
-// Stylistic alternatives
+/**
+ * @see {@link setImmutable}
+ */
 set.immutable = setImmutable
+
+/**
+ * @see {@link delImmutable}
+ */
 del.immutable = delImmutable
 
 // Helpers
