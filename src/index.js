@@ -1,8 +1,11 @@
 /**
- * Module description goes here
+ * `prop-ops` assists in performing CRUD operations on javascript objects and arrays
+ * in an uncertain world. `prop-ops` operates in an immutable way by default, with the
+ * option of transforming objects in place
  *
- * @module prop-ops
- * @typicalname prop
+ * @module prop
+ * @authors [Matthew Meyers](https://github.com/mgmeyers), [Sunyoung Kim](https://github.com/SunyoungKim508)
+ * @license MIT
  */
 
 const PKG_NAME = 'prop-ops'
@@ -64,17 +67,15 @@ export function get(obj, propString, fallBack = null) {
  * @param  {Object|Array} obj        the object or array to traverse
  * @param  {String}       propString the path to the desired property
  * @param  {Any}          value      the value to set
+ * @return {Object|Array}            an updated version of the `obj`
  *
  * @example
  * import * as prop from 'prop-ops'
  *
  * const objA = { a: { b: 'c' } }
- * prop.set(objA, 'a.c', 'd')
- * // > objA == { a: { b: 'c', c: 'd' } }
- *
- * const emptyObj = {}
- * prop.set(emptyObj, 'a.[0].b.c', 12)
- * // > emptyObj == { a: [{ b: { c: 12 } }] }
+ * const updatedA = prop.set(objA, 'a.c', 'd')
+ * // > objA     == { a: { b: 'c' } }
+ * // > updatedA == { a: { b: 'c', c: 'd' } }
  *
  */
 export function set(obj, propString, value) {
@@ -88,59 +89,6 @@ export function set(obj, propString, value) {
 
   if (isUndefined(value)) {
     throwErr('set', 'value')
-  }
-
-  const path = Array.isArray(propString) ? propString : propString.split('.')
-
-  const isArray = isArrayAccessor(path[0])
-  const nextObj = isUndefined(obj) ? generateObjOrArr(isArray) : obj
-
-  const nextPath = stripBrackets(path.shift())
-
-  if (path.length === 0) {
-    if (!isArray) {
-      nextObj[nextPath] = value
-    } else if (isValidArrayIndex(nextPath)) {
-      nextObj.splice(nextPath, 1, value)
-    }
-
-    return nextObj
-  }
-
-  nextObj[nextPath] = set(nextObj[nextPath], path, value)
-
-  return nextObj
-}
-
-/**
- * Like `set`, but will not modify the original object
- *
- * @param  {Object|Array} obj        the object or array to traverse
- * @param  {String}       propString the path to the desired property
- * @param  {Any}          value      the value to set
- * @return {Object|Array}            an updated version of the `obj`
- *
- * @example
- * import * as prop from 'prop-ops'
- *
- * const objA = { a: { b: 'c' } }
- * const updatedA = prop.setImmutable(objA, 'a.c', 'd')
- * // Also: prop.set.immutable(objA, 'a.c', 'd')
- * // > objA     == { a: { b: 'c' } }
- * // > updatedA == { a: { b: 'c', c: 'd' } }
- *
- */
-export function setImmutable(obj, propString, value) {
-  if (!isUndefined(obj) && typeof obj !== 'object') {
-    throwErr('setImmutable', 'obj')
-  }
-
-  if (!isArrayOrStr(propString)) {
-    throwErr('setImmutable', 'propString')
-  }
-
-  if (isUndefined(value)) {
-    throwErr('setImmutable', 'value')
   }
 
   const path = Array.isArray(propString) ? propString : propString.split('.')
@@ -160,9 +108,64 @@ export function setImmutable(obj, propString, value) {
     return clone
   }
 
-  clone[nextPath] = setImmutable(clone[nextPath], path, value)
+  clone[nextPath] = set(clone[nextPath], path, value)
 
   return clone
+}
+
+/**
+ * Like `set`, but will modify the original object
+ *
+ * @param  {Object|Array} obj        the object or array to traverse
+ * @param  {String}       propString the path to the desired property
+ * @param  {Any}          value      the value to set
+ *
+ * @example
+ * import * as prop from 'prop-ops'
+ *
+ * const objA = { a: { b: 'c' } }
+ * prop.setMutable(objA, 'a.c', 'd')
+ * // Also: prop.set.mutate(objA, 'a.c', 'd')
+ * // > objA == { a: { b: 'c', c: 'd' } }
+ *
+ * const emptyObj = {}
+ * prop.setMutable(emptyObj, 'a.[0].b.c', 12)
+ * // > emptyObj == { a: [{ b: { c: 12 } }] }
+ *
+ */
+set.mutate = function setMutable(obj, propString, value) {
+  if (!isUndefined(obj) && typeof obj !== 'object') {
+    throwErr('setMutable', 'obj')
+  }
+
+  if (!isArrayOrStr(propString)) {
+    throwErr('setMutable', 'propString')
+  }
+
+  if (isUndefined(value)) {
+    throwErr('setMutable', 'value')
+  }
+
+  const path = Array.isArray(propString) ? propString : propString.split('.')
+
+  const isArray = isArrayAccessor(path[0])
+  const nextObj = isUndefined(obj) ? generateObjOrArr(isArray) : obj
+
+  const nextPath = stripBrackets(path.shift())
+
+  if (path.length === 0) {
+    if (!isArray) {
+      nextObj[nextPath] = value
+    } else if (isValidArrayIndex(nextPath)) {
+      nextObj.splice(nextPath, 1, value)
+    }
+
+    return nextObj
+  }
+
+  nextObj[nextPath] = setMutable(nextObj[nextPath], path, value)
+
+  return nextObj
 }
 
 /**
@@ -211,15 +214,15 @@ export function has(obj, propString) {
  *
  * @param  {Object} obj        object to traverse
  * @param  {String} propString the path to the desired property
+ * @return {Object}
  *
  * @example
  * import * as prop from 'prop-ops'
  *
- * const objA = { a: [{ b: { c: 'd' } }] }
- * prop.del(objA, 'a.b')
- * // noop
- * prop.del(objA, 'a.[0].b')
- * // objA == { a: [{}] }
+ * const objA = { a: { b: { c: 'd' } } }
+ * const updatedA = prop.del(objA, 'a.b')
+ * // > objA     == { a: { b: { c: 'd' } } }
+ * // > updatedA == { a: {} }
  *
  */
 export function del(obj, propString) {
@@ -229,6 +232,55 @@ export function del(obj, propString) {
 
   if (!isArrayOrStr(propString)) {
     throwErr('del', 'propString')
+  }
+
+  const path = Array.isArray(propString) ? propString : propString.split('.')
+
+  const isArray = isArrayAccessor(path[0])
+  const clone = cloneObjOrArr(obj, isArray)
+  const nextPath = stripBrackets(path.shift())
+
+  if (path.length === 0) {
+    if (!isArray) {
+      delete clone[nextPath]
+    } else if (isValidArrayIndex(nextPath)) {
+      clone.splice(nextPath, 1)
+    }
+
+    return clone
+  }
+
+  if (!isUndefined(clone[nextPath])) {
+    clone[nextPath] = del(clone[nextPath], path)
+  }
+
+  return clone
+}
+
+/**
+ * Like `del`, but will modify the original object
+ *
+ * @param  {Object} obj        object to traverse
+ * @param  {String} propString the path to the desired property
+ *
+ * @example
+ * import * as prop from 'prop-ops'
+ *
+ * const objA = { a: [{ b: { c: 'd' } }] }
+ * prop.delMutable(objA, 'a.b')
+ * // Also: prop.del.mutate(objA, 'a.b')
+ * // noop
+ * prop.delMutable(objA, 'a.[0].b')
+ * // objA == { a: [{}] }
+ *
+ */
+del.mutate = function delMutable(obj, propString) {
+  if (!isUndefined(obj) && typeof obj !== 'object') {
+    throwErr('delMutable', 'obj')
+  }
+
+  if (!isArrayOrStr(propString)) {
+    throwErr('delMutable', 'propString')
   }
 
   const path = Array.isArray(propString) ? propString : propString.split('.')
@@ -252,65 +304,6 @@ export function del(obj, propString) {
 
   return obj
 }
-
-/**
- * Like `del` but will not modify the original object
- *
- * @param  {Object} obj        object to traverse
- * @param  {String} propString the path to the desired property
- * @return {Object}            updated object
- *
- * @example
- * import * as prop from 'prop-ops'
- *
- * const objA = { a: { b: { c: 'd' } } }
- * const updatedA = prop.del(objA, 'a.b')
- * // Also: prop.del.immutable(objA, 'a.b')
- * // > objA == { a: { b: { c: 'd' } } }
- * // > updatedA == { a: {} }
- *
- */
-export function delImmutable(obj, propString) {
-  if (!isUndefined(obj) && typeof obj !== 'object') {
-    throwErr('delImmutable', 'obj')
-  }
-
-  if (!isArrayOrStr(propString)) {
-    throwErr('delImmutable', 'propString')
-  }
-
-  const path = Array.isArray(propString) ? propString : propString.split('.')
-
-  const isArray = isArrayAccessor(path[0])
-  const clone = cloneObjOrArr(obj, isArray)
-  const nextPath = stripBrackets(path.shift())
-
-  if (path.length === 0) {
-    if (!isArray) {
-      delete clone[nextPath]
-    } else if (isValidArrayIndex(nextPath)) {
-      clone.splice(nextPath, 1)
-    }
-
-    return clone
-  }
-
-  if (!isUndefined(clone[nextPath])) {
-    clone[nextPath] = delImmutable(clone[nextPath], path)
-  }
-
-  return clone
-}
-
-/**
- * @see {@link setImmutable}
- */
-set.immutable = setImmutable
-
-/**
- * @see {@link delImmutable}
- */
-del.immutable = delImmutable
 
 // Helpers
 function throwErr(fnName, paramName) {

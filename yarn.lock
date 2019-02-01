@@ -1597,11 +1597,6 @@ dir-glob@^2.0.0:
   dependencies:
     path-type "^3.0.0"
 
-dmd-clear@0.1.2:
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/dmd-clear/-/dmd-clear-0.1.2.tgz#f061c5b072b26ba23164dd5a8c0bc8668833be12"
-  integrity sha1-8GHFsHKya6IxZN1ajAvIZogzvhI=
-
 dmd@^3.0.10:
   version "3.0.13"
   resolved "https://registry.yarnpkg.com/dmd/-/dmd-3.0.13.tgz#73294e8fae1a7a1a1c849d86b027adf04fbd5662"

@@ -7,7 +7,7 @@
   "license": "MIT",
   "scripts": {
     "build": "rimraf lib && webpack --config webpack.config.js",
-    "docs": "jsdoc2md src/*.js --plugin dmd-clear > README.md",
+    "docs": "jsdoc2md src/*.js > README.md",
     "lint": "eslint src/*.js",
     "format": "prettier --config .prettierrc --write \"src/*.js\"",
     "test": "ava",
@@ -19,7 +19,6 @@
     "@babel/preset-env": "7.3.1",
     "@babel/register": "7.0.0",
     "ava": "1.2.0",
-    "dmd-clear": "0.1.2",
     "eslint": "^5.13.0",
     "jsdoc": "3.5.5",
     "jsdoc-to-markdown": "4.0.1",

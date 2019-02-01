@@ -99,22 +99,22 @@ test('should set props', t => {
 
   const throws = [
     () => {
-      prop.set({})
+      prop.set.mutate({})
     },
     () => {
-      prop.set('a', 'something', 12)
+      prop.set.mutate('a', 'something', 12)
     },
     () => {
-      prop.set(1, 'something', 12)
+      prop.set.mutate(1, 'something', 12)
     },
     () => {
       const frozen = Object.freeze({})
-      prop.set(frozen, 'something', 12)
+      prop.set.mutate(frozen, 'something', 12)
     },
   ]
 
   comparisons.forEach(c => {
-    prop.set(c.obj, c.propStr, c.value)
+    prop.set.mutate(c.obj, c.propStr, c.value)
     t.deepEqual(c.obj, c.expected, c.message)
   })
 
@@ -181,11 +181,7 @@ test('should immutably set props', t => {
   ]
 
   comparisons.forEach(c => {
-    t.deepEqual(
-      prop.setImmutable(c.obj, c.propStr, c.value),
-      c.expected,
-      c.message
-    )
+    t.deepEqual(prop.set(c.obj, c.propStr, c.value), c.expected, c.message)
   })
 
   throws.forEach(th => {
@@ -193,14 +189,14 @@ test('should immutably set props', t => {
   })
 
   const initial = { a: { b: 'c' } }
-  const newObj = prop.setImmutable(initial, 'a.b', 'd')
+  const newObj = prop.set(initial, 'a.b', 'd')
 
   t.not(initial, newObj)
   t.not(initial.a, newObj.a)
 
   t.notThrows(() => {
     const frozen = Object.freeze({})
-    prop.setImmutable(frozen, 'something', 12)
+    prop.set(frozen, 'something', 12)
   })
 })
 
@@ -264,20 +260,20 @@ test('should delete props', t => {
 
   const throws = [
     () => {
-      prop.del('a', 'something')
+      prop.del.mutate('a', 'something')
     },
     () => {
       const frozen = Object.freeze({ something: 12 })
-      prop.del(frozen, 'something')
+      prop.del.mutate(frozen, 'something')
     },
     () => {
       const sealed = Object.seal({ something: 12 })
-      prop.del(sealed, 'something')
+      prop.del.mutate(sealed, 'something')
     },
   ]
 
   comparisons.forEach(c => {
-    prop.del(c.obj, c.propStr)
+    prop.del.mutate(c.obj, c.propStr)
     t.deepEqual(c.obj, c.expected, c.message)
   })
 
@@ -331,23 +327,23 @@ test('should immutably delete props', t => {
   })
 
   const initial = { a: { b: { c: 'd' } } }
-  const newObj = prop.delImmutable(initial, 'a.b.c')
+  const newObj = prop.del(initial, 'a.b.c')
 
   t.not(initial, newObj)
   t.not(initial.a, newObj.a)
-  t.deepEqual(prop.delImmutable(newObj, 'a'), {})
+  t.deepEqual(prop.del(newObj, 'a'), {})
 
   t.throws(() => {
-    prop.delImmutable('a', 'something', 12)
+    prop.del('a', 'something', 12)
   })
 
   t.notThrows(() => {
     const frozen = Object.freeze({ something: 12 })
-    prop.delImmutable(frozen, 'something')
+    prop.del(frozen, 'something')
   })
 
   t.notThrows(() => {
     const sealed = Object.seal({ something: 12 })
-    prop.delImmutable(sealed, 'something')
+    prop.del(sealed, 'something')
   })
 })
