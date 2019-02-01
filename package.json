@@ -1,12 +1,17 @@
 {
   "name": "prop-ops",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "lib/index.js",
+  "description": "Assists in performing CRUD operations on javascript objects and arrays in an uncertain world",
   "repository": "https://github.com/mgmeyers/prop-ops",
-  "author": "mgmeyers <matthew.gregory.meyers@gmail.com>",
+  "bugs": {
+    "url": "https://github.com/mgmeyers/prop-ops/issues"
+  },
+  "author": "Matthew Meyers, Sunyoung Kim",
+  "homepage": "https://github.com/mgmeyers/prop-ops",
   "license": "MIT",
   "scripts": {
-    "build": "rimraf lib && webpack --config webpack.config.js",
+    "build": "rimraf lib && babel src --out-dir lib",
     "docs": "jsdoc2md src/*.js > README.md",
     "lint": "eslint src/*.js",
     "format": "prettier --config .prettierrc --write \"src/*.js\"",
