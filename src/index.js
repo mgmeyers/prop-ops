@@ -1,13 +1,39 @@
-const PKG_NAME = 'props-ops'
+/**
+ * Module description goes here
+ *
+ * @module prop-ops
+ * @typicalname prop
+ */
+
+const PKG_NAME = 'prop-ops'
 
 /**
- * Safely accesses deeply nested object properties
- * @param  {Object} obj        object to traverse
- * @param  {String} propString ie. 'report.properties.is_big_box'
- * @param  {Any}    def        default value
+ * Safely access deeply nested properties of unstructured objects
+ *
+ * @param  {Object|Array} obj             the object or array to traverse
+ * @param  {String}       propString      the path to the desired property
+ * @param  {Any}          [fallBack=null] a fall back value to return if the property is not found
  * @return {Any}
+ *
+ * @example
+ * import * as prop from 'prop-ops'
+ *
+ * const objA = { a: { b: "c" } }
+ * prop.get(objA, 'a.b')
+ * // > 'c'
+ *
+ * // Specify a value to return if a property is not found
+ * prop.get(objA, 'a.nope')
+ * // > null
+ * prop.get(objA, 'a.nope', 24)
+ * // > 24
+ *
+ * // Traverse an array
+ * const objB = { a: [{ b: "c" }] }
+ * prop.get(objB, 'a.[0].b')
+ * // > 'c'
  */
-export function get(obj, propString, def = null) {
+export function get(obj, propString, fallBack = null) {
   if (!isStr(propString)) {
     throwErr('get', 'propString')
   }
@@ -25,19 +51,27 @@ export function get(obj, propString, def = null) {
       continue
     }
 
-    return def
+    return fallBack
   }
 
-  return !isUndefined(nextObj) && !isNull(nextObj) ? nextObj : def
+  return !isUndefined(nextObj) && !isNull(nextObj) ? nextObj : fallBack
 }
 
 /**
- * Safely sets deeply nested object properties
+ * Safely set deeply nested object properties.
+ *
  * @param  {Object} obj        object to traverse
  * @param  {String} propString ie. 'report.properties.is_big_box'
- * @return {Object}            updated object
+ *
+ * @example
+ * import * as prop from 'prop-ops'
+ *
  */
 export function set(obj, propString, value) {
+  if (!isUndefined(obj) && typeof obj !== 'object') {
+    throwErr('set', 'obj')
+  }
+
   if (!isArrayOrStr(propString)) {
     throwErr('set', 'propString')
   }
@@ -75,6 +109,10 @@ export function set(obj, propString, value) {
  * @return {Object}            updated object
  */
 export function setImmutable(obj, propString, value) {
+  if (!isUndefined(obj) && typeof obj !== 'object') {
+    throwErr('setImmutable', 'obj')
+  }
+
   if (!isArrayOrStr(propString)) {
     throwErr('setImmutable', 'propString')
   }
@@ -142,6 +180,10 @@ export function has(obj, propString) {
  * @return {Object}            updated object
  */
 export function del(obj, propString) {
+  if (!isUndefined(obj) && typeof obj !== 'object') {
+    throwErr('del', 'obj')
+  }
+
   if (!isArrayOrStr(propString)) {
     throwErr('del', 'propString')
   }
@@ -175,6 +217,10 @@ export function del(obj, propString) {
  * @return {Object}            updated object
  */
 export function delImmutable(obj, propString) {
+  if (!isUndefined(obj) && typeof obj !== 'object') {
+    throwErr('delImmutable', 'obj')
+  }
+
   if (!isArrayOrStr(propString)) {
     throwErr('delImmutable', 'propString')
   }
@@ -202,16 +248,11 @@ export function delImmutable(obj, propString) {
   return clone
 }
 
-/**
- * Stylistic alternatives
- */
+// Stylistic alternatives
 set.immutable = setImmutable
 del.immutable = delImmutable
 
-/**
- * Helpers
- */
-
+// Helpers
 function throwErr(fnName, paramName) {
   throw new Error(`${PKG_NAME} - ${fnName}: invalid parameter: ${paramName}`)
 }

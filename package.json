@@ -8,7 +8,8 @@
   "scripts": {
     "test": "ava",
     "build": "rimraf lib && webpack --config webpack.config.js",
-    "prettier": "prettier --config .prettierrc --write \"src/*.js\""
+    "prettier": "prettier --config .prettierrc --write \"src/*.js\"",
+    "docs": "jsdoc2md src/*.js --plugin dmd-clear > doc.md"
   },
   "devDependencies": {
     "@babel/cli": "7.2.3",
@@ -16,6 +17,9 @@
     "@babel/preset-env": "7.3.1",
     "@babel/register": "7.0.0",
     "ava": "1.2.0",
+    "dmd-clear": "0.1.2",
+    "jsdoc": "3.5.5",
+    "jsdoc-to-markdown": "4.0.1",
     "prettier": "1.16.3",
     "rimraf": "2.6.3"
   },
