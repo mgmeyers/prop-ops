@@ -3,9 +3,8 @@
 ## prop
 `npm install prop-ops`
 
-`prop-ops` assists in performing CRUD operations on javascript objects and arrays
-in an uncertain world. `prop-ops` operates in an immutable way by default, with the
-option of transforming objects in place
+`prop-ops` assists in performing CRUD operations on javascript objects and arrays.
+By default, `prop-ops` does not mutate objects, but offers the option of doing so.
 
 **Authors**: [Matthew Meyers](https://github.com/mgmeyers), [Sunyoung Kim](https://github.com/SunyoungKim508)  
 **License**: MIT  
@@ -14,6 +13,8 @@ option of transforming objects in place
     * [.get(obj, propString, [fallBack])](#module_prop.get) ⇒ <code>Any</code>
     * [.set(obj, propString, value)](#module_prop.set) ⇒ <code>Object</code> \| <code>Array</code>
         * [.mutate(obj, propString, value)](#module_prop.set.mutate)
+    * [.merge(obj, propString, value)](#module_prop.merge) ⇒ <code>Object</code> \| <code>Array</code>
+        * [.mutate(obj, propString, value)](#module_prop.merge.mutate)
     * [.has(obj, propString)](#module_prop.has) ⇒ <code>Boolean</code>
     * [.del(obj, propString)](#module_prop.del) ⇒ <code>Object</code>
         * [.mutate(obj, propString)](#module_prop.del.mutate)
@@ -57,7 +58,7 @@ Sets deeply nested object properties. `set` will generate objects (or arrays)
 to reach the final destination of the input path
 
 **Kind**: static method of [<code>prop</code>](#module_prop)  
-**Returns**: <code>Object</code> \| <code>Array</code> - an updated version of the `obj`  
+**Returns**: <code>Object</code> \| <code>Array</code> - an updated version of `obj`  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -92,13 +93,66 @@ Like `set`, but will modify the original object
 import * as prop from 'prop-ops'
 
 const objA = { a: { b: 'c' } }
-prop.setMutable(objA, 'a.c', 'd')
-// Also: prop.set.mutate(objA, 'a.c', 'd')
+prop.set.mutate(objA, 'a.c', 'd')
 // > objA == { a: { b: 'c', c: 'd' } }
 
 const emptyObj = {}
-prop.setMutable(emptyObj, 'a.[0].b.c', 12)
+prop.set.mutate(emptyObj, 'a.[0].b.c', 12)
 // > emptyObj == { a: [{ b: { c: 12 } }] }
+```
+<a name="module_prop.merge"></a>
+
+### prop.merge(obj, propString, value) ⇒ <code>Object</code> \| <code>Array</code>
+Merge deeply nested objects or arrays. `merge` will generate objects (or arrays)
+to reach the final destination of the input path
+
+**Kind**: static method of [<code>prop</code>](#module_prop)  
+**Returns**: <code>Object</code> \| <code>Array</code> - an updated version of `obj`  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| obj | <code>Object</code> \| <code>Array</code> | the object or array to traverse |
+| propString | <code>String</code> | the path to the desired property |
+| value | <code>Object</code> \| <code>Array</code> | the value to set |
+
+**Example**  
+```js
+import * as prop from 'prop-ops'
+
+const objA = { a: { b: 'c' } }
+const updatedA = prop.merge(objA, 'a', { d: 'e', f: 'g' })
+// > objA     == { a: { b: 'c' } }
+// > updatedA == { a: { b: 'c', d: 'e', f: 'g' } }
+
+const objB = { a: [0, 1, 2] }
+const updatedB = prop.merge(objB, 'a', [, , 3, 4])
+// > objB     == { a: [0, 1, 2] }
+// > updatedB == { a: [0, 1, 3, 4] }
+```
+<a name="module_prop.merge.mutate"></a>
+
+#### merge.mutate(obj, propString, value)
+Like `merge`, but will modify the original object
+
+**Kind**: static method of [<code>merge</code>](#module_prop.merge)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| obj | <code>Object</code> \| <code>Array</code> | the object or array to traverse |
+| propString | <code>String</code> | the path to the desired property |
+| value | <code>Object</code> \| <code>Array</code> | the value to set |
+
+**Example**  
+```js
+import * as prop from 'prop-ops'
+
+const objA = { a: { b: 'c' } }
+prop.merge.mutate(objA, 'a', { d: 'e', f: 'g' })
+// > objA == { a: { b: 'c', d: 'e', f: 'g' } }
+
+const objB = { a: [0, 1, 2] }
+prop.merge.mutate(objB, 'a', [, , 3, 4])
+// > objB == { a: [0, 1, 3, 4] }
 ```
 <a name="module_prop.has"></a>
 
@@ -160,9 +214,8 @@ Like `del`, but will modify the original object
 import * as prop from 'prop-ops'
 
 const objA = { a: [{ b: { c: 'd' } }] }
-prop.delMutable(objA, 'a.b')
-// Also: prop.del.mutate(objA, 'a.b')
+prop.del.mutate(objA, 'a.b')
 // noop
-prop.delMutable(objA, 'a.[0].b')
+prop.del.mutate(objA, 'a.[0].b')
 // objA == { a: [{}] }
 ```

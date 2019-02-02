@@ -200,6 +200,184 @@ test('should immutably set props', t => {
   })
 })
 
+test('should immutably merge props', t => {
+  const comparisons = [
+    {
+      obj: { a: { b: 'c' } },
+      propStr: 'a',
+      value: { d: 'e' },
+      expected: { a: { b: 'c', d: 'e' } },
+      message: 'should merge existing shallow prop',
+    },
+    {
+      obj: [[0, 1], 2, 3],
+      propStr: '[0]',
+      value: [5, 6],
+      expected: [[5, 6], 2, 3],
+      message: 'should merge arrays by index',
+    },
+    {
+      obj: [[0, 1], 2, 3],
+      propStr: '[0]',
+      value: [, , 5, 6],
+      expected: [[0, 1, 5, 6], 2, 3],
+      message: 'should merge arrays with empty members',
+    },
+    {
+      obj: { a: 'b' },
+      propStr: 'b',
+      value: { d: 'e' },
+      expected: { a: 'b', b: { d: 'e' } },
+      message: 'should add new shallow prop',
+    },
+    {
+      obj: { a: { b: { c: 'd' } } },
+      propStr: 'a.b',
+      value: { c: 'c', d: 'd' },
+      expected: { a: { b: { c: 'c', d: 'd' } } },
+      message: 'should merge deeply nested prop',
+    },
+    {
+      obj: { a: [{ b: { c: 'd' } }] },
+      propStr: 'a.[0].b',
+      value: { c: 'c', d: 'd' },
+      expected: {
+        a: [{ b: { c: 'c', d: 'd' } }],
+      },
+      message: 'should merge deeply nested prop inside array',
+    },
+    {
+      obj: {},
+      propStr: 'a.[0].b',
+      value: { c: 12 },
+      expected: {
+        a: [{ b: { c: 12 } }],
+      },
+      message: 'should generate objects and arrays if none exist',
+    },
+  ]
+
+  const throws = [
+    () => {
+      prop.merge({})
+    },
+    () => {
+      prop.merge('a', 'something', { a: 'b' })
+    },
+    () => {
+      prop.merge(1, 'something', { a: 'b' })
+    },
+    () => {
+      prop.merge({ a: {} }, 'a', [0])
+    },
+  ]
+
+  comparisons.forEach(c => {
+    t.deepEqual(prop.merge(c.obj, c.propStr, c.value), c.expected, c.message)
+  })
+
+  throws.forEach(th => {
+    t.throws(th)
+  })
+
+  const initial = { a: { b: 'c' } }
+  const newObj = prop.merge(initial, 'a', { c: 'd' })
+
+  t.not(initial, newObj)
+  t.not(initial.a, newObj.a)
+
+  t.notThrows(() => {
+    const frozen = Object.freeze({})
+    prop.merge(frozen, 'something', {})
+  })
+})
+
+test('should merge props', t => {
+  const comparisons = [
+    {
+      obj: { a: { b: 'c' } },
+      propStr: 'a',
+      value: { d: 'e' },
+      expected: { a: { b: 'c', d: 'e' } },
+      message: 'should merge existing shallow prop',
+    },
+    {
+      obj: [[0, 1], 2, 3],
+      propStr: '[0]',
+      value: [5, 6],
+      expected: [[5, 6], 2, 3],
+      message: 'should merge arrays by index',
+    },
+    {
+      obj: [[0, 1], 2, 3],
+      propStr: '[0]',
+      value: [, , 5, 6],
+      expected: [[0, 1, 5, 6], 2, 3],
+      message: 'should merge arrays with empty members',
+    },
+    {
+      obj: { a: 'b' },
+      propStr: 'b',
+      value: { d: 'e' },
+      expected: { a: 'b', b: { d: 'e' } },
+      message: 'should add new shallow prop',
+    },
+    {
+      obj: { a: { b: { c: 'd' } } },
+      propStr: 'a.b',
+      value: { c: 'c', d: 'd' },
+      expected: { a: { b: { c: 'c', d: 'd' } } },
+      message: 'should merge deeply nested prop',
+    },
+    {
+      obj: { a: [{ b: { c: 'd' } }] },
+      propStr: 'a.[0].b',
+      value: { c: 'c', d: 'd' },
+      expected: {
+        a: [{ b: { c: 'c', d: 'd' } }],
+      },
+      message: 'should merge deeply nested prop inside array',
+    },
+    {
+      obj: {},
+      propStr: 'a.[0].b',
+      value: { c: 12 },
+      expected: {
+        a: [{ b: { c: 12 } }],
+      },
+      message: 'should generate objects and arrays if none exist',
+    },
+  ]
+
+  const throws = [
+    () => {
+      prop.merge.mutate({})
+    },
+    () => {
+      prop.merge.mutate('a', 'something', { a: 'b' })
+    },
+    () => {
+      prop.merge.mutate(1, 'something', { a: 'b' })
+    },
+    () => {
+      prop.merge.mutate({ a: {} }, 'a', [0])
+    },
+    () => {
+      const frozen = Object.freeze({})
+      prop.merge.mutate(frozen, 'something', {})
+    },
+  ]
+
+  comparisons.forEach(c => {
+    prop.merge.mutate(c.obj, c.propStr, c.value)
+    t.deepEqual(c.obj, c.expected, c.message)
+  })
+
+  throws.forEach(th => {
+    t.throws(th)
+  })
+})
+
 test('should check existence of props', t => {
   const comparisons = [
     { obj: { a: 'b' }, propStr: 'a', expected: true },

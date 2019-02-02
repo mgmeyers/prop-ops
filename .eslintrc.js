@@ -22,6 +22,7 @@ module.exports = {
     'no-lonely-if': 'warn',
     'no-mixed-spaces-and-tabs': 'warn',
     'no-return-assign': ['error', 'always'],
+    'no-sparse-arrays': 'off',
     'no-tabs': 'warn',
     'no-trailing-spaces': 'warn',
     'no-unneeded-ternary': 'warn',
