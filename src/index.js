@@ -174,7 +174,7 @@ set.mutate = function setMutable(obj, propString, value) {
  *
  * @param  {Object|Array} obj        the object or array to traverse
  * @param  {String}       propString the path to the desired property
- * @param  {Object|Array} value      the value to set
+ * @param  {Object|Array} value      the object to merge
  * @return {Object|Array}            an updated version of `obj`
  *
  * @example
@@ -232,7 +232,7 @@ export function merge(obj, propString, value) {
  *
  * @param  {Object|Array} obj        the object or array to traverse
  * @param  {String}       propString the path to the desired property
- * @param  {Object|Array} value      the value to set
+ * @param  {Object|Array} value      the object to merge
  *
  * @example
  * import * as prop from 'prop-ops'
