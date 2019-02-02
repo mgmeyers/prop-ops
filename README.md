@@ -113,7 +113,7 @@ to reach the final destination of the input path
 | --- | --- | --- |
 | obj | <code>Object</code> \| <code>Array</code> | the object or array to traverse |
 | propString | <code>String</code> | the path to the desired property |
-| value | <code>Object</code> \| <code>Array</code> | the value to set |
+| value | <code>Object</code> \| <code>Array</code> | the object to merge |
 
 **Example**  
 ```js
@@ -140,7 +140,7 @@ Like `merge`, but will modify the original object
 | --- | --- | --- |
 | obj | <code>Object</code> \| <code>Array</code> | the object or array to traverse |
 | propString | <code>String</code> | the path to the desired property |
-| value | <code>Object</code> \| <code>Array</code> | the value to set |
+| value | <code>Object</code> \| <code>Array</code> | the object to merge |
 
 **Example**  
 ```js
