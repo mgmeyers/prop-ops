@@ -1,13 +1,16 @@
 {
   "name": "prop-ops",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "lib/index.js",
   "description": "Assists in performing CRUD operations on javascript objects and arrays in an uncertain world",
   "repository": "https://github.com/mgmeyers/prop-ops",
   "bugs": {
     "url": "https://github.com/mgmeyers/prop-ops/issues"
   },
-  "contributors": ["Matthew Meyers", "Sunyoung Kim"],
+  "contributors": [
+    "Matthew Meyers",
+    "Sunyoung Kim"
+  ],
   "homepage": "https://github.com/mgmeyers/prop-ops",
   "license": "MIT",
   "scripts": {
