@@ -2,7 +2,7 @@
   "name": "prop-ops",
   "version": "1.0.1",
   "main": "lib/index.js",
-  "description": "Assists in performing CRUD operations on javascript objects and arrays in an uncertain world",
+  "description": "Assists in performing CRUD operations on javascript objects and arrays",
   "repository": "https://github.com/mgmeyers/prop-ops",
   "bugs": {
     "url": "https://github.com/mgmeyers/prop-ops/issues"
