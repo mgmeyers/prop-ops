@@ -93,6 +93,7 @@ test('should set props', t => {
       expected: {
         a: [{ b: { c: 12 } }],
       },
+      loose: true,
       message: 'should generate objects and arrays if none exist',
     },
   ]
@@ -108,13 +109,16 @@ test('should set props', t => {
       prop.set.mutate(1, 'something', 12)
     },
     () => {
+      prop.set.mutate({}, 'a.b', 12)
+    },
+    () => {
       const frozen = Object.freeze({})
       prop.set.mutate(frozen, 'something', 12)
     },
   ]
 
   comparisons.forEach(c => {
-    prop.set.mutate(c.obj, c.propStr, c.value)
+    prop.set.mutate(c.obj, c.propStr, c.value, !!c.loose)
     t.deepEqual(c.obj, c.expected, c.message)
   })
 
@@ -164,6 +168,7 @@ test('should immutably set props', t => {
       expected: {
         a: [{ b: { c: 12 } }],
       },
+      loose: true,
       message: 'should generate objects and arrays if none exist',
     },
   ]
@@ -176,12 +181,19 @@ test('should immutably set props', t => {
       prop.set('a', 'something', 12)
     },
     () => {
+      prop.set({}, 'a.b', 12)
+    },
+    () => {
       prop.set(1, 'something', 12)
     },
   ]
 
   comparisons.forEach(c => {
-    t.deepEqual(prop.set(c.obj, c.propStr, c.value), c.expected, c.message)
+    t.deepEqual(
+      prop.set(c.obj, c.propStr, c.value, !!c.loose),
+      c.expected,
+      c.message
+    )
   })
 
   throws.forEach(th => {
@@ -253,6 +265,7 @@ test('should immutably merge props', t => {
       expected: {
         a: [{ b: { c: 12 } }],
       },
+      loose: true,
       message: 'should generate objects and arrays if none exist',
     },
   ]
@@ -260,6 +273,9 @@ test('should immutably merge props', t => {
   const throws = [
     () => {
       prop.merge({})
+    },
+    () => {
+      prop.merge({}, 'a.b', { a: 'b' })
     },
     () => {
       prop.merge('a', 'something', { a: 'b' })
@@ -273,7 +289,11 @@ test('should immutably merge props', t => {
   ]
 
   comparisons.forEach(c => {
-    t.deepEqual(prop.merge(c.obj, c.propStr, c.value), c.expected, c.message)
+    t.deepEqual(
+      prop.merge(c.obj, c.propStr, c.value, !!c.loose),
+      c.expected,
+      c.message
+    )
   })
 
   throws.forEach(th => {
@@ -346,6 +366,7 @@ test('should merge props', t => {
         a: [{ b: { c: 12 } }],
       },
       message: 'should generate objects and arrays if none exist',
+      loose: true,
     },
   ]
 
@@ -355,6 +376,9 @@ test('should merge props', t => {
     },
     () => {
       prop.merge.mutate('a', 'something', { a: 'b' })
+    },
+    () => {
+      prop.merge.mutate({}, 'a.b', { a: 'b' })
     },
     () => {
       prop.merge.mutate(1, 'something', { a: 'b' })
@@ -369,7 +393,7 @@ test('should merge props', t => {
   ]
 
   comparisons.forEach(c => {
-    prop.merge.mutate(c.obj, c.propStr, c.value)
+    prop.merge.mutate(c.obj, c.propStr, c.value, !!c.loose)
     t.deepEqual(c.obj, c.expected, c.message)
   })
 

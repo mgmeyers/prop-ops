@@ -10,14 +10,19 @@ By default, `prop-ops` does not mutate objects, but offers the option of doing s
 **License**: MIT  
 
 * [prop](#module_prop)
-    * [.get(obj, propString, [fallBack])](#module_prop.get) ⇒ <code>Any</code>
-    * [.set(obj, propString, value)](#module_prop.set) ⇒ <code>Object</code> \| <code>Array</code>
-        * [.mutate(obj, propString, value)](#module_prop.set.mutate)
-    * [.merge(obj, propString, value)](#module_prop.merge) ⇒ <code>Object</code> \| <code>Array</code>
-        * [.mutate(obj, propString, value)](#module_prop.merge.mutate)
-    * [.has(obj, propString)](#module_prop.has) ⇒ <code>Boolean</code>
-    * [.del(obj, propString)](#module_prop.del) ⇒ <code>Object</code>
-        * [.mutate(obj, propString)](#module_prop.del.mutate)
+    * _static_
+        * [.get(obj, propString, [fallBack])](#module_prop.get) ⇒ <code>Any</code>
+        * [.set(obj, propString, value, [loose])](#module_prop.set) ⇒ <code>Object</code> \| <code>Array</code>
+            * [.mutate(obj, propString, value, [loose])](#module_prop.set.mutate)
+        * [.merge(obj, propString, value, [loose])](#module_prop.merge) ⇒ <code>Object</code> \| <code>Array</code>
+            * [.mutate(obj, propString, value, [loose])](#module_prop.merge.mutate)
+        * [.has(obj, propString)](#module_prop.has) ⇒ <code>Boolean</code>
+        * [.del(obj, propString)](#module_prop.del) ⇒ <code>Object</code>
+            * [.mutate(obj, propString)](#module_prop.del.mutate)
+    * _inner_
+        * [~_set()](#module_prop.._set)
+        * [~_merge()](#module_prop.._merge)
+        * [~_del()](#module_prop.._del)
 
 <a name="module_prop.get"></a>
 
@@ -53,18 +58,19 @@ prop.get(objB, 'a.[0].b')
 ```
 <a name="module_prop.set"></a>
 
-### prop.set(obj, propString, value) ⇒ <code>Object</code> \| <code>Array</code>
+### prop.set(obj, propString, value, [loose]) ⇒ <code>Object</code> \| <code>Array</code>
 Sets deeply nested object properties. `set` will generate objects (or arrays)
 to reach the final destination of the input path
 
 **Kind**: static method of [<code>prop</code>](#module_prop)  
 **Returns**: <code>Object</code> \| <code>Array</code> - an updated version of `obj`  
 
-| Param | Type | Description |
-| --- | --- | --- |
-| obj | <code>Object</code> \| <code>Array</code> | the object or array to traverse |
-| propString | <code>String</code> | the path to the desired property |
-| value | <code>Any</code> | the value to set |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| obj | <code>Object</code> \| <code>Array</code> |  | the object or array to traverse |
+| propString | <code>String</code> |  | the path to the desired property |
+| value | <code>Any</code> |  | the value to set |
+| [loose] | <code>Boolean</code> | <code>false</code> | create new objects / arrays along the path if `undefined` is encountered |
 
 **Example**  
 ```js
@@ -74,19 +80,23 @@ const objA = { a: { b: 'c' } }
 const updatedA = prop.set(objA, 'a.c', 'd')
 // > objA     == { a: { b: 'c' } }
 // > updatedA == { a: { b: 'c', c: 'd' } }
+
+const constructedObj = prop.set({}, 'a.[0].b.c', 12, true)
+// > constructedObj == { a: [{ b: { c: 12 } }] }
 ```
 <a name="module_prop.set.mutate"></a>
 
-#### set.mutate(obj, propString, value)
+#### set.mutate(obj, propString, value, [loose])
 Like `set`, but will modify the original object
 
 **Kind**: static method of [<code>set</code>](#module_prop.set)  
 
-| Param | Type | Description |
-| --- | --- | --- |
-| obj | <code>Object</code> \| <code>Array</code> | the object or array to traverse |
-| propString | <code>String</code> | the path to the desired property |
-| value | <code>Any</code> | the value to set |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| obj | <code>Object</code> \| <code>Array</code> |  | the object or array to traverse |
+| propString | <code>String</code> |  | the path to the desired property |
+| value | <code>Any</code> |  | the value to set |
+| [loose] | <code>Boolean</code> | <code>false</code> | create new objects / arrays along the path if `undefined` is encountered |
 
 **Example**  
 ```js
@@ -97,23 +107,23 @@ prop.set.mutate(objA, 'a.c', 'd')
 // > objA == { a: { b: 'c', c: 'd' } }
 
 const emptyObj = {}
-prop.set.mutate(emptyObj, 'a.[0].b.c', 12)
+prop.set.mutate(emptyObj, 'a.[0].b.c', 12, true)
 // > emptyObj == { a: [{ b: { c: 12 } }] }
 ```
 <a name="module_prop.merge"></a>
 
-### prop.merge(obj, propString, value) ⇒ <code>Object</code> \| <code>Array</code>
-Merge deeply nested objects or arrays. `merge` will generate objects (or arrays)
-to reach the final destination of the input path
+### prop.merge(obj, propString, value, [loose]) ⇒ <code>Object</code> \| <code>Array</code>
+Merge deeply nested objects or arrays.
 
 **Kind**: static method of [<code>prop</code>](#module_prop)  
 **Returns**: <code>Object</code> \| <code>Array</code> - an updated version of `obj`  
 
-| Param | Type | Description |
-| --- | --- | --- |
-| obj | <code>Object</code> \| <code>Array</code> | the object or array to traverse |
-| propString | <code>String</code> | the path to the desired property |
-| value | <code>Object</code> \| <code>Array</code> | the object to merge |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| obj | <code>Object</code> \| <code>Array</code> |  | the object or array to traverse |
+| propString | <code>String</code> |  | the path to the desired property |
+| value | <code>Object</code> \| <code>Array</code> |  | the object to merge |
+| [loose] | <code>Boolean</code> | <code>false</code> | create new objects / arrays along the path if `undefined` is encountered |
 
 **Example**  
 ```js
@@ -131,16 +141,17 @@ const updatedB = prop.merge(objB, 'a', [, , 3, 4])
 ```
 <a name="module_prop.merge.mutate"></a>
 
-#### merge.mutate(obj, propString, value)
+#### merge.mutate(obj, propString, value, [loose])
 Like `merge`, but will modify the original object
 
 **Kind**: static method of [<code>merge</code>](#module_prop.merge)  
 
-| Param | Type | Description |
-| --- | --- | --- |
-| obj | <code>Object</code> \| <code>Array</code> | the object or array to traverse |
-| propString | <code>String</code> | the path to the desired property |
-| value | <code>Object</code> \| <code>Array</code> | the object to merge |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| obj | <code>Object</code> \| <code>Array</code> |  | the object or array to traverse |
+| propString | <code>String</code> |  | the path to the desired property |
+| value | <code>Object</code> \| <code>Array</code> |  | the object to merge |
+| [loose] | <code>Boolean</code> | <code>false</code> | create new objects / arrays along the path if `undefined` is encountered |
 
 **Example**  
 ```js
@@ -219,3 +230,21 @@ prop.del.mutate(objA, 'a.b')
 prop.del.mutate(objA, 'a.[0].b')
 // objA == { a: [{}] }
 ```
+<a name="module_prop.._set"></a>
+
+### prop~\_set()
+-- SET --------------
+
+**Kind**: inner method of [<code>prop</code>](#module_prop)  
+<a name="module_prop.._merge"></a>
+
+### prop~\_merge()
+-- MERGE --------------
+
+**Kind**: inner method of [<code>prop</code>](#module_prop)  
+<a name="module_prop.._del"></a>
+
+### prop~\_del()
+-- DELETE --------------
+
+**Kind**: inner method of [<code>prop</code>](#module_prop)  

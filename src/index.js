@@ -12,6 +12,10 @@
 const PKG_NAME = 'prop-ops'
 
 /**
+ * -- GET --------------
+ */
+
+/**
  * Safely access deeply nested properties of unstructured objects
  *
  * @param  {Object|Array} obj             the object or array to traverse
@@ -62,24 +66,10 @@ export function get(obj, propString, fallBack = null) {
 }
 
 /**
- * Sets deeply nested object properties. `set` will generate objects (or arrays)
- * to reach the final destination of the input path
- *
- * @param  {Object|Array} obj        the object or array to traverse
- * @param  {String}       propString the path to the desired property
- * @param  {Any}          value      the value to set
- * @return {Object|Array}            an updated version of `obj`
- *
- * @example
- * import * as prop from 'prop-ops'
- *
- * const objA = { a: { b: 'c' } }
- * const updatedA = prop.set(objA, 'a.c', 'd')
- * // > objA     == { a: { b: 'c' } }
- * // > updatedA == { a: { b: 'c', c: 'd' } }
- *
+ * -- SET --------------
  */
-export function set(obj, propString, value) {
+
+function _set(obj, propString, value, mutate, strict) {
   if (!isUndefined(obj) && typeof obj !== 'object') {
     throwErr('set', 'obj')
   }
@@ -94,62 +84,20 @@ export function set(obj, propString, value) {
 
   const path = Array.isArray(propString) ? propString : propString.split('.')
 
-  const isArray = isArrayAccessor(path[0])
-  const clone = cloneObjOrArr(obj, isArray)
-
-  const nextPath = stripBrackets(path.shift())
-
-  if (path.length === 0) {
-    if (!isArray) {
-      clone[nextPath] = value
-    } else if (isValidArrayIndex(nextPath)) {
-      clone.splice(nextPath, 1, value)
-    }
-
-    return clone
+  if (strict && isUndefined(obj)) {
+    throw new Error(
+      `${PKG_NAME} - Error setting ${
+        path[0]
+      } of ${propString}: object is undefined`
+    )
   }
-
-  clone[nextPath] = set(clone[nextPath], path, value)
-
-  return clone
-}
-
-/**
- * Like `set`, but will modify the original object
- *
- * @param  {Object|Array} obj        the object or array to traverse
- * @param  {String}       propString the path to the desired property
- * @param  {Any}          value      the value to set
- *
- * @example
- * import * as prop from 'prop-ops'
- *
- * const objA = { a: { b: 'c' } }
- * prop.set.mutate(objA, 'a.c', 'd')
- * // > objA == { a: { b: 'c', c: 'd' } }
- *
- * const emptyObj = {}
- * prop.set.mutate(emptyObj, 'a.[0].b.c', 12)
- * // > emptyObj == { a: [{ b: { c: 12 } }] }
- *
- */
-set.mutate = function setMutable(obj, propString, value) {
-  if (!isUndefined(obj) && typeof obj !== 'object') {
-    throwErr('set.mutate', 'obj')
-  }
-
-  if (!isArrayOrStr(propString)) {
-    throwErr('set.mutate', 'propString')
-  }
-
-  if (isUndefined(value)) {
-    throwErr('set.mutate', 'value')
-  }
-
-  const path = Array.isArray(propString) ? propString : propString.split('.')
 
   const isArray = isArrayAccessor(path[0])
-  const nextObj = isUndefined(obj) ? generateObjOrArr(isArray) : obj
+  const nextObj = mutate
+    ? isUndefined(obj)
+      ? generateObjOrArr(isArray)
+      : obj
+    : cloneObjOrArr(obj, isArray)
 
   const nextPath = stripBrackets(path.shift())
 
@@ -163,19 +111,127 @@ set.mutate = function setMutable(obj, propString, value) {
     return nextObj
   }
 
-  nextObj[nextPath] = set.mutate(nextObj[nextPath], path, value)
+  nextObj[nextPath] = _set(nextObj[nextPath], path, value, mutate, strict)
 
   return nextObj
 }
 
 /**
- * Merge deeply nested objects or arrays. `merge` will generate objects (or arrays)
+ * Sets deeply nested object properties. `set` will generate objects (or arrays)
  * to reach the final destination of the input path
  *
- * @param  {Object|Array} obj        the object or array to traverse
- * @param  {String}       propString the path to the desired property
- * @param  {Object|Array} value      the object to merge
- * @return {Object|Array}            an updated version of `obj`
+ * @param  {Object|Array} obj           the object or array to traverse
+ * @param  {String}       propString    the path to the desired property
+ * @param  {Any}          value         the value to set
+ * @param  {Boolean}      [loose=false] create new objects / arrays along the path if `undefined` is encountered
+ * @return {Object|Array}               an updated version of `obj`
+ *
+ * @example
+ * import * as prop from 'prop-ops'
+ *
+ * const objA = { a: { b: 'c' } }
+ * const updatedA = prop.set(objA, 'a.c', 'd')
+ * // > objA     == { a: { b: 'c' } }
+ * // > updatedA == { a: { b: 'c', c: 'd' } }
+ *
+ * const constructedObj = prop.set({}, 'a.[0].b.c', 12, true)
+ * // > constructedObj == { a: [{ b: { c: 12 } }] }
+ */
+export function set(obj, propString, value, loose = false) {
+  return _set(obj, propString, value, false, !loose)
+}
+
+/**
+ * Like `set`, but will modify the original object
+ *
+ * @param  {Object|Array} obj           the object or array to traverse
+ * @param  {String}       propString    the path to the desired property
+ * @param  {Any}          value         the value to set
+ * @param  {Boolean}      [loose=false] create new objects / arrays along the path if `undefined` is encountered
+ *
+ * @example
+ * import * as prop from 'prop-ops'
+ *
+ * const objA = { a: { b: 'c' } }
+ * prop.set.mutate(objA, 'a.c', 'd')
+ * // > objA == { a: { b: 'c', c: 'd' } }
+ *
+ * const emptyObj = {}
+ * prop.set.mutate(emptyObj, 'a.[0].b.c', 12, true)
+ * // > emptyObj == { a: [{ b: { c: 12 } }] }
+ *
+ */
+set.mutate = function setMutate(obj, propString, value, loose = false) {
+  return _set(obj, propString, value, true, !loose)
+}
+
+/**
+ * -- MERGE --------------
+ */
+
+function _merge(obj, propString, value, mutate, strict) {
+  if (!isUndefined(obj) && typeof obj !== 'object') {
+    throwErr('merge', 'obj')
+  }
+
+  if (!isArrayOrStr(propString)) {
+    throwErr('merge', 'propString')
+  }
+
+  if (isUndefined(value) || typeof value !== 'object') {
+    throwErr('merge', 'value')
+  }
+
+  const path = Array.isArray(propString) ? propString : propString.split('.')
+
+  if (strict && isUndefined(obj)) {
+    throw new Error(
+      `${PKG_NAME} - Error merging ${
+        path[0]
+      } of ${propString}: object is undefined`
+    )
+  }
+
+  const isArray = isArrayAccessor(path[0])
+  const nextObj = mutate
+    ? isUndefined(obj)
+      ? generateObjOrArr(isArray)
+      : obj
+    : cloneObjOrArr(obj, isArray)
+
+  const nextPath = stripBrackets(path.shift())
+
+  if (path.length === 0) {
+    if (isArray !== Array.isArray(value)) {
+      throw new Error(
+        `${PKG_NAME} - merge: attempted to merge an array with an object`
+      )
+    }
+
+    if (nextObj[nextPath] === undefined) {
+      nextObj[nextPath] = value
+    } else {
+      nextObj[nextPath] = mutate
+        ? Object.assign(nextObj[nextPath], value)
+        : Object.assign(isArray ? [] : {}, nextObj[nextPath], value)
+    }
+
+    return nextObj
+  }
+
+  nextObj[nextPath] = _merge(nextObj[nextPath], path, value, mutate, strict)
+
+  return nextObj
+}
+
+/**
+ * Merge deeply nested objects or arrays.
+ *
+ * @param  {Object|Array} obj           the object or array to traverse
+ * @param  {String}       propString    the path to the desired property
+ * @param  {Object|Array} value         the object to merge
+ * @param  {Boolean}      [loose=false] create new objects / arrays along the path if `undefined` is encountered
+ * @return {Object|Array}               an updated version of `obj`
  *
  * @example
  * import * as prop from 'prop-ops'
@@ -191,48 +247,17 @@ set.mutate = function setMutable(obj, propString, value) {
  * // > updatedB == { a: [0, 1, 3, 4] }
  *
  */
-export function merge(obj, propString, value) {
-  if (!isUndefined(obj) && typeof obj !== 'object') {
-    throwErr('merge', 'obj')
-  }
-
-  if (!isArrayOrStr(propString)) {
-    throwErr('merge', 'propString')
-  }
-
-  if (isUndefined(value) || typeof value !== 'object') {
-    throwErr('merge', 'value')
-  }
-
-  const path = Array.isArray(propString) ? propString : propString.split('.')
-
-  const isArray = isArrayAccessor(path[0])
-  const clone = cloneObjOrArr(obj, isArray)
-
-  const nextPath = stripBrackets(path.shift())
-
-  if (path.length === 0) {
-    if (isArray !== Array.isArray(value)) {
-      throw new Error(
-        `${PKG_NAME} - merge: attempted to merge an array with an object`
-      )
-    }
-
-    clone[nextPath] = Object.assign(isArray ? [] : {}, clone[nextPath], value)
-    return clone
-  }
-
-  clone[nextPath] = merge(clone[nextPath], path, value)
-
-  return clone
+export function merge(obj, propString, value, loose = false) {
+  return _merge(obj, propString, value, false, !loose)
 }
 
 /**
  * Like `merge`, but will modify the original object
  *
- * @param  {Object|Array} obj        the object or array to traverse
- * @param  {String}       propString the path to the desired property
- * @param  {Object|Array} value      the object to merge
+ * @param  {Object|Array} obj           the object or array to traverse
+ * @param  {String}       propString    the path to the desired property
+ * @param  {Object|Array} value         the object to merge
+ * @param  {Boolean}      [loose=false] create new objects / arrays along the path if `undefined` is encountered
  *
  * @example
  * import * as prop from 'prop-ops'
@@ -246,45 +271,13 @@ export function merge(obj, propString, value) {
  * // > objB == { a: [0, 1, 3, 4] }
  *
  */
-merge.mutate = function mergeMutable(obj, propString, value) {
-  if (!isUndefined(obj) && typeof obj !== 'object') {
-    throwErr('merge.mutate', 'obj')
-  }
-
-  if (!isArrayOrStr(propString)) {
-    throwErr('merge.mutate', 'propString')
-  }
-
-  if (isUndefined(value) || typeof value !== 'object') {
-    throwErr('merge.mutate', 'value')
-  }
-
-  const path = Array.isArray(propString) ? propString : propString.split('.')
-
-  const isArray = isArrayAccessor(path[0])
-  const nextObj = isUndefined(obj) ? generateObjOrArr(isArray) : obj
-
-  const nextPath = stripBrackets(path.shift())
-
-  if (path.length === 0) {
-    if (isArray !== Array.isArray(value)) {
-      throw new Error(
-        `${PKG_NAME} - merge.mutate: attempted to merge an array with an object`
-      )
-    }
-
-    nextObj[nextPath] = Object.assign(
-      isArray ? [] : {},
-      nextObj[nextPath],
-      value
-    )
-    return nextObj
-  }
-
-  nextObj[nextPath] = merge.mutate(nextObj[nextPath], path, value)
-
-  return nextObj
+merge.mutate = function mergeMutate(obj, propString, value, loose = false) {
+  return _merge(obj, propString, value, true, !loose)
 }
+
+/**
+ * -- HAS --------------
+ */
 
 /**
  * Check if an object or array has a property
@@ -328,6 +321,42 @@ export function has(obj, propString) {
 }
 
 /**
+ * -- DELETE --------------
+ */
+
+function _del(obj, propString, mutate) {
+  if (!isUndefined(obj) && typeof obj !== 'object') {
+    throwErr('del', 'obj')
+  }
+
+  if (!isArrayOrStr(propString)) {
+    throwErr('del', 'propString')
+  }
+
+  const path = Array.isArray(propString) ? propString : propString.split('.')
+
+  const isArray = isArrayAccessor(path[0])
+  const nextObj = mutate ? obj : cloneObjOrArr(obj, isArray)
+  const nextPath = stripBrackets(path.shift())
+
+  if (path.length === 0) {
+    if (!isArray) {
+      delete nextObj[nextPath]
+    } else if (isValidArrayIndex(nextPath)) {
+      nextObj.splice(nextPath, 1)
+    }
+
+    return nextObj
+  }
+
+  if (!isUndefined(nextObj[nextPath])) {
+    nextObj[nextPath] = _del(nextObj[nextPath], path, mutate)
+  }
+
+  return nextObj
+}
+
+/**
  * Deletes deeply nested object properties
  *
  * @param  {Object} obj        object to traverse
@@ -344,35 +373,7 @@ export function has(obj, propString) {
  *
  */
 export function del(obj, propString) {
-  if (!isUndefined(obj) && typeof obj !== 'object') {
-    throwErr('del', 'obj')
-  }
-
-  if (!isArrayOrStr(propString)) {
-    throwErr('del', 'propString')
-  }
-
-  const path = Array.isArray(propString) ? propString : propString.split('.')
-
-  const isArray = isArrayAccessor(path[0])
-  const clone = cloneObjOrArr(obj, isArray)
-  const nextPath = stripBrackets(path.shift())
-
-  if (path.length === 0) {
-    if (!isArray) {
-      delete clone[nextPath]
-    } else if (isValidArrayIndex(nextPath)) {
-      clone.splice(nextPath, 1)
-    }
-
-    return clone
-  }
-
-  if (!isUndefined(clone[nextPath])) {
-    clone[nextPath] = del(clone[nextPath], path)
-  }
-
-  return clone
+  return _del(obj, propString, false)
 }
 
 /**
@@ -392,34 +393,7 @@ export function del(obj, propString) {
  *
  */
 del.mutate = function delMutable(obj, propString) {
-  if (!isUndefined(obj) && typeof obj !== 'object') {
-    throwErr('del.mutate', 'obj')
-  }
-
-  if (!isArrayOrStr(propString)) {
-    throwErr('del.mutate', 'propString')
-  }
-
-  const path = Array.isArray(propString) ? propString : propString.split('.')
-
-  const isArray = isArrayAccessor(path[0])
-  const nextPath = stripBrackets(path.shift())
-
-  if (path.length === 0) {
-    if (!isArray) {
-      delete obj[nextPath]
-    } else if (isValidArrayIndex(nextPath)) {
-      obj.splice(nextPath, 1)
-    }
-
-    return obj
-  }
-
-  if (!isUndefined(obj[nextPath])) {
-    obj[nextPath] = del.mutate(obj[nextPath], path)
-  }
-
-  return obj
+  return _del(obj, propString, true)
 }
 
 // Helpers
