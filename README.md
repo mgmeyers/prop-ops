@@ -10,19 +10,14 @@ By default, `prop-ops` does not mutate objects, but offers the option of doing s
 **License**: MIT  
 
 * [prop](#module_prop)
-    * _static_
-        * [.get(obj, propString, [fallBack])](#module_prop.get) ⇒ <code>Any</code>
-        * [.set(obj, propString, value, [loose])](#module_prop.set) ⇒ <code>Object</code> \| <code>Array</code>
-            * [.mutate(obj, propString, value, [loose])](#module_prop.set.mutate)
-        * [.merge(obj, propString, value, [loose])](#module_prop.merge) ⇒ <code>Object</code> \| <code>Array</code>
-            * [.mutate(obj, propString, value, [loose])](#module_prop.merge.mutate)
-        * [.has(obj, propString)](#module_prop.has) ⇒ <code>Boolean</code>
-        * [.del(obj, propString)](#module_prop.del) ⇒ <code>Object</code>
-            * [.mutate(obj, propString)](#module_prop.del.mutate)
-    * _inner_
-        * [~_set()](#module_prop.._set)
-        * [~_merge()](#module_prop.._merge)
-        * [~_del()](#module_prop.._del)
+    * [.get(obj, propString, [fallBack])](#module_prop.get) ⇒ <code>Any</code>
+    * [.set(obj, propString, value, [loose])](#module_prop.set) ⇒ <code>Object</code> \| <code>Array</code>
+        * [.mutate(obj, propString, value, [loose])](#module_prop.set.mutate)
+    * [.merge(obj, propString, value, [loose])](#module_prop.merge) ⇒ <code>Object</code> \| <code>Array</code>
+        * [.mutate(obj, propString, value, [loose])](#module_prop.merge.mutate)
+    * [.has(obj, propString)](#module_prop.has) ⇒ <code>Boolean</code>
+    * [.del(obj, propString)](#module_prop.del) ⇒ <code>Object</code>
+        * [.mutate(obj, propString)](#module_prop.del.mutate)
 
 <a name="module_prop.get"></a>
 
@@ -230,21 +225,3 @@ prop.del.mutate(objA, 'a.b')
 prop.del.mutate(objA, 'a.[0].b')
 // objA == { a: [{}] }
 ```
-<a name="module_prop.._set"></a>
-
-### prop~\_set()
--- SET --------------
-
-**Kind**: inner method of [<code>prop</code>](#module_prop)  
-<a name="module_prop.._merge"></a>
-
-### prop~\_merge()
--- MERGE --------------
-
-**Kind**: inner method of [<code>prop</code>](#module_prop)  
-<a name="module_prop.._del"></a>
-
-### prop~\_del()
--- DELETE --------------
-
-**Kind**: inner method of [<code>prop</code>](#module_prop)  

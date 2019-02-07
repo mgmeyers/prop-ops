@@ -69,6 +69,9 @@ export function get(obj, propString, fallBack = null) {
  * -- SET --------------
  */
 
+/**
+ * @ignore
+ */
 function _set(obj, propString, value, mutate, strict) {
   if (!isUndefined(obj) && typeof obj !== 'object') {
     throwErr('set', 'obj')
@@ -169,6 +172,9 @@ set.mutate = function setMutate(obj, propString, value, loose = false) {
  * -- MERGE --------------
  */
 
+/**
+ * @ignore
+ */
 function _merge(obj, propString, value, mutate, strict) {
   if (!isUndefined(obj) && typeof obj !== 'object') {
     throwErr('merge', 'obj')
@@ -324,6 +330,9 @@ export function has(obj, propString) {
  * -- DELETE --------------
  */
 
+/**
+ * @ignore
+ */
 function _del(obj, propString, mutate) {
   if (!isUndefined(obj) && typeof obj !== 'object') {
     throwErr('del', 'obj')
