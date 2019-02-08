@@ -120,8 +120,7 @@ function _set(obj, propString, value, mutate, strict) {
 }
 
 /**
- * Sets deeply nested object properties. `set` will generate objects (or arrays)
- * to reach the final destination of the input path
+ * Sets deeply nested object properties.
  *
  * @param  {Object|Array} obj           the object or array to traverse
  * @param  {String}       propString    the path to the desired property
