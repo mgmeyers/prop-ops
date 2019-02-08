@@ -54,8 +54,7 @@ prop.get(objB, 'a.[0].b')
 <a name="module_prop.set"></a>
 
 ### prop.set(obj, propString, value, [loose]) ⇒ <code>Object</code> \| <code>Array</code>
-Sets deeply nested object properties. `set` will generate objects (or arrays)
-to reach the final destination of the input path
+Sets deeply nested object properties.
 
 **Kind**: static method of [<code>prop</code>](#module_prop)  
 **Returns**: <code>Object</code> \| <code>Array</code> - an updated version of `obj`  
