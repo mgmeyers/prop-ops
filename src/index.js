@@ -367,9 +367,9 @@ function _del(obj, propString, mutate) {
 /**
  * Deletes deeply nested object properties
  *
- * @param  {Object} obj        object to traverse
+ * @param  {Object|Array} obj        object to traverse
  * @param  {String} propString the path to the desired property
- * @return {Object}
+ * @return {Object|Array}
  *
  * @example
  * import * as prop from 'prop-ops'
@@ -387,8 +387,8 @@ export function del(obj, propString) {
 /**
  * Like `del`, but will modify the original object
  *
- * @param  {Object} obj        object to traverse
- * @param  {String} propString the path to the desired property
+ * @param  {Object|Array} obj    object to traverse
+ * @param  {String} propString   the path to the desired property
  *
  * @example
  * import * as prop from 'prop-ops'

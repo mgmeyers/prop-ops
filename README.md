@@ -16,7 +16,7 @@ By default, `prop-ops` does not mutate objects, but offers the option of doing s
     * [.merge(obj, propString, value, [loose])](#module_prop.merge) ⇒ <code>Object</code> \| <code>Array</code>
         * [.mutate(obj, propString, value, [loose])](#module_prop.merge.mutate)
     * [.has(obj, propString)](#module_prop.has) ⇒ <code>Boolean</code>
-    * [.del(obj, propString)](#module_prop.del) ⇒ <code>Object</code>
+    * [.del(obj, propString)](#module_prop.del) ⇒ <code>Object</code> \| <code>Array</code>
         * [.mutate(obj, propString)](#module_prop.del.mutate)
 
 <a name="module_prop.get"></a>
@@ -183,14 +183,14 @@ prop.has(objA, 'a.[0].b.c')
 ```
 <a name="module_prop.del"></a>
 
-### prop.del(obj, propString) ⇒ <code>Object</code>
+### prop.del(obj, propString) ⇒ <code>Object</code> \| <code>Array</code>
 Deletes deeply nested object properties
 
 **Kind**: static method of [<code>prop</code>](#module_prop)  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| obj | <code>Object</code> | object to traverse |
+| obj | <code>Object</code> \| <code>Array</code> | object to traverse |
 | propString | <code>String</code> | the path to the desired property |
 
 **Example**  
@@ -211,7 +211,7 @@ Like `del`, but will modify the original object
 
 | Param | Type | Description |
 | --- | --- | --- |
-| obj | <code>Object</code> | object to traverse |
+| obj | <code>Object</code> \| <code>Array</code> | object to traverse |
 | propString | <code>String</code> | the path to the desired property |
 
 **Example**  
