@@ -81,10 +81,6 @@ function _set(obj, propString, value, mutate, strict) {
     throwErr('set', 'propString')
   }
 
-  if (isUndefined(value)) {
-    throwErr('set', 'value')
-  }
-
   const path = Array.isArray(propString) ? propString : propString.split('.')
 
   if (strict && isUndefined(obj)) {
@@ -181,10 +177,6 @@ function _merge(obj, propString, value, mutate, strict) {
 
   if (!isArrayOrStr(propString)) {
     throwErr('merge', 'propString')
-  }
-
-  if (isUndefined(value) || typeof value !== 'object') {
-    throwErr('merge', 'value')
   }
 
   const path = Array.isArray(propString) ? propString : propString.split('.')
