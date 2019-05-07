@@ -19,6 +19,11 @@ test('should get props', t => {
       message: 'should return fallback if no value found',
     },
     {
+      actual: prop.get(undefined, 'b', 'c'),
+      expected: 'c',
+      message: 'should return fallback if object is undefined',
+    },
+    {
       actual: prop.get({ a: { b: { c: 'd' } } }, 'a.b.c'),
       expected: 'd',
       message: 'should get deeply nested value',

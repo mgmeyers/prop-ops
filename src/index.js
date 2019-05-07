@@ -54,7 +54,11 @@ export function get(obj, propString, fallBack = null) {
   for (let i = 0; i < len; i++) {
     const nextPath = stripBrackets(path[i])
 
-    if (!isNull(nextObj) && !isUndefined(nextObj[nextPath])) {
+    if (
+      !isNull(nextObj) &&
+      !isUndefined(nextObj) &&
+      !isUndefined(nextObj[nextPath])
+    ) {
       nextObj = nextObj[nextPath]
       continue
     }
